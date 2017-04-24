@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta content="text/html" charset="utf-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <title>Pong</title>
+   <link rel="stylesheet" href="">
+   <script src="phaser.min.js"></script>
+   <style>
+      *, *:before, *:after {
+         box-sizing: border-box;
+         -webkit-box-sizing: border-box;
+      }
+      body {
+         background: black;
+      }
+   </style>
+</head>
+<body>
+   <div id="app"></div>
+   <script>
+      var game = new Phaser.Game(900,700,Phaser.AUTO, '',{
+         preload: preload,
+         create: create,
+         update: update
+      });
+
+      //init vars
+      var paddle1, paddle2, ball, ball_launched, ball_velocity;
+
+      function preload() {
+         game.load.image('paddle1', './assets/red.png');
+         game.load.image('paddle2', './assets/blue.png');
+         game.load.image('ball', './assets/ball_yellow.png');
+
+         game.load.audio('hit_1','./assets/audio/sthswng3.wav');
+         game.load.audio('score_point','./assets/audio/point.wav');
+      }
+
+      function create() {
+         ball_launched = false;
+         ball_velocity = 9999;
+         // runs on frame init
+         paddle1 = create_paddle(0,game.world.centerY, 'paddle1');
+         paddle2 = create_paddle(game.world.width - 16, game.world.centerY, 'paddle2');
+         ball = create_ball(game.world.centerX,game.world.centerY);
+
+         game.input.onDown.add(launch_ball, this);
+      }
+
+      function update() {
+         control_paddle(paddle1,game.input.y);
+         game.physics.arcade.collide(paddle1, ball, function() {
+            // game.sound.play('hit_1');
+         });
+         game.physics.arcade.collide(paddle2, ball, function() {
+            // game.sound.play('hit_1');
+         });
+
+         if (ball.body.blocked.left) {
+            // game.sound.play('score_point');
+            console.log("player 1 loses");
+         } else if (ball.body.blocked.right) {
+            // game.sound.play('score_point');
+            console.log("player 2 loses");
+         }
+
+         // EASY AI
+         paddle2.body.velocity.setTo(ball.body.velocity.y);
+         paddle2.body.velocity.x = 0; // not move on x-axis
+         paddle2.body.maxVelocity.y = 900; // no faster than 250
+      }
+
+      function create_paddle(x,y, player) {
+         var paddle = game.add.sprite(x,y,player);
+         console.log(paddle);
+         // upper left 0,0
+         paddle.anchor.setTo(0.5,0.5);
+         game.physics.arcade.enable(paddle);
+         paddle.body.collideWorldBounds = true; // keep paddle from goin out bounds
+         paddle.body.immovable = true;
+         paddle.scale.setTo(0.6,0.45);
+
+         return paddle;
+      }
+
+      function control_paddle(paddle,y) {
+         paddle.y = y;
+         
+         if(paddle.y < paddle.height / 2) {
+            paddle.y = paddle.height / 2;
+         }  else if (paddle.y > game.world.height - paddle.height/2) {
+            paddle.y = game.world.height - paddle.height /2;
+         }
+      }
+
+      function create_ball(x,y) {
+         var ball = game.add.sprite(x,y,'ball');
+         ball.anchor.setTo(0.5,0.5);
+         game.physics.arcade.enable(ball);
+         ball.body.collideWorldBounds = true;
+         ball.scale.setTo(0.8,0.8);
+         ball.body.bounce.setTo(1,1);
+
+         return ball;
+      }
+
+      function launch_ball() {
+         if(ball_launched) {
+            ball.x = game.world.centerX;
+            ball.y = game.world.centerY;
+            ball.body.velocity.setTo(0,0);
+            ball_launched = false;
+         } else {
+            ball.body.velocity.x = -ball_velocity;
+            ball.body.velocity.y = ball_velocity;
+            ball_launched = true;
+         }
+      }
+   </script>
+   <script src="/bundle.js"></script>
+</body>
+</html>
