@@ -39,7 +39,7 @@
 
       function create() {
          ball_launched = false;
-         ball_velocity = 9999;
+         ball_velocity = 300;
          // runs on frame init
          paddle1 = create_paddle(0,game.world.centerY, 'paddle1');
          paddle2 = create_paddle(game.world.width - 16, game.world.centerY, 'paddle2');
@@ -68,7 +68,7 @@
          // EASY AI
          paddle2.body.velocity.setTo(ball.body.velocity.y);
          paddle2.body.velocity.x = 0; // not move on x-axis
-         paddle2.body.maxVelocity.y = 900; // no faster than 250
+         paddle2.body.maxVelocity.y = 250; // no faster than 250
       }
 
       function create_paddle(x,y, player) {
